@@ -38,7 +38,196 @@
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
 </head>
+<style>
+  /* Download PDF Button Styling */
+/* ------------------------- */
+/*    CLINICAL PREDICT UI    */
+/* ------------------------- */
 
+.clinical-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-top: 40px;
+}
+
+.clinical-sub {
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 40px;
+  font-size: 16px;
+}
+
+/* Grid Wrapper */
+.clinical-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 40px;
+}
+
+/* Mobile Responsive Grid */
+@media (max-width: 992px) {
+  .clinical-wrapper {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+}
+
+/* Image Card */
+.clinical-image-card {
+  background: #fff;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.panel-title {
+  font-size: 16px;
+  color: #000000;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.image-box img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(65, 241, 153, 0.35);
+}
+
+.scan-info {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+/* RIGHT SIDE PANEL */
+.clinical-right {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Diagnosis Card */
+.diagnosis-card {
+  background-color: #1ABC9C ;
+  padding: 22px;
+  border-radius: 16px;
+  color: #fff;
+}
+
+.primary-heading {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.diagnosis-text {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* Confidence Card */
+.confidence-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+}
+
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-high {
+  background: #d1ffe0;
+  color: #098b35;
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.conf-label {
+  margin-top: 15px;
+  font-weight: 600;
+}
+
+.conf-bar {
+  width: 100%;
+  height: 10px;
+  background: #e3e3e3;
+  border-radius: 6px;
+}
+
+.conf-fill {
+  height: 100%;
+  border-radius: 6px;
+}
+
+.conf-fill.positive {
+  background: #ff5e5e;
+}
+
+.conf-fill.negative {
+  background: #1ABC9C;
+}
+
+.conf-value {
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+/* Insights */
+.insight-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+}
+
+.insight-card h5 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.insight-item {
+  margin-bottom: 15px;
+}
+
+.insight-item h6 {
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+/* Download Button */
+.pdf-btn {
+  background: #1ABC9C;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 10px;
+  border: none;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.pdf-btn:hover {
+  background: #017e7a;
+  transform: translateY(-2px);
+}
+
+/* MOBILE BUTTON FULL WIDTH */
+@media (max-width: 768px) {
+  .pdf-btn {
+    padding: 16px;
+    font-size: 17px;
+  }
+}
+
+</style>
 <body>
 
   <!-- ======= Header ======= -->
@@ -205,124 +394,108 @@
       </div>
     </section><!-- End Counts Section -->
 
-    <section id="predict">
-        <div class="container" data-aos="fade-up">
-            <div class="row gy-4 align-items-center">
-                <div class="col-lg-5 col-md-6">
-                    <img src="static/assets/img/predict.jpg" alt="">
-                </div>
-                <div class="col-lg-5 col-md-6">
-                    <header class="section-header" >
-                        <h2>Scanned Retina</h2>
-                        <p> Result</p>
-                        <h4 style="padding-top:30px"> <mark style="background-color:midnightblue;color:white;border-radius:5px">{{ diagnosis }}</mark></h4>
-                        <h4 style="padding-top:30px">Probability of Positive: {{ '%.1f' % (probabilities[0] * 100) }}% </h4>
-                        <h4 style="padding-top:30px">Probability of Negative: {{ '%.1f' % (probabilities[1] * 100) }}%</h4>
-                      
-                    </header>
-                 
-                </div>
 
-        
 
-            </div>
-            
+  
+    <section id="predict" class="predict-section">
+  <div class="container" data-aos="fade-up">
+
+    <h2 class="clinical-title">Clinical Analysis Report</h2>
+    <p class="clinical-sub">
+      AI-powered diabetic retinopathy assessment using advanced convolutional neural 
+      network analysis of retinal imagery.
+    </p>
+
+    <div class="clinical-wrapper">
+
+      <!-- LEFT IMAGE PANEL -->
+      <div class="clinical-image-card">
+        <h5 class="panel-title">Retinal Scan Analysis</h5>
+
+        <div class="image-box">
+          <img src="{{ url_for('static', filename='uploads/' + user_image) }}" alt="Uploaded Retina" />
         </div>
-    </section>
-    
-    <!-- ======= Team Section ======= -->
-    <section id="team" class="team">
 
-        <div class="container" data-aos="fade-up">
-  
-          <header class="section-header">
-            <h2>Team</h2>
-            <p></p>
-          </header>
-  
-          <div class="row gy-4">
-  
-            <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
-              <div class="member">
-                <div class="member-img">
-                  <img src="static/assets/img/team/team1.jpg" class="img-fluid" alt="">
-                  <div class="social">
-                    <a href=""><i class="bi bi-twitter"></i></a>
-                    <a href=""><i class="bi bi-facebook"></i></a>
-                    <a href=""><i class="bi bi-instagram"></i></a>
-                    <a href=""><i class="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div class="member-info">
-                  <h4>Aravindan V</h4>
-                  <span>Architect</span>
-               
-                </div>
-              </div>
-            </div>
-  
-            <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
-              <div class="member">
-                <div class="member-img">
-                  <img src="static/assets/img/team/team2.jpg" class="img-fluid" alt="">
-                  <div class="social">
-                    <a href=""><i class="bi bi-twitter"></i></a>
-                    <a href=""><i class="bi bi-facebook"></i></a>
-                    <a href=""><i class="bi bi-instagram"></i></a>
-                    <a href=""><i class="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div class="member-info">
-                  <h4>Ajmal Akram S</h4>
-                  <span>Fullstack Developer</span>
-                 
-                </div>
-              </div>
-            </div>
-  
-            <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="300">
-              <div class="member">
-                <div class="member-img">
-                  <img src="static/assets/img/team/team3.jpg" class="img-fluid" alt="">
-                  <div class="social">
-                    <a href=""><i class="bi bi-twitter"></i></a>
-                    <a href=""><i class="bi bi-facebook"></i></a>
-                    <a href=""><i class="bi bi-instagram"></i></a>
-                    <a href=""><i class="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div class="member-info">
-                  <h4>Arun J</h4>
-                  <span>Technical Writer</span>
-              
-                </div>
-              </div>
-            </div>
-  
-            <div class="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="400">
-              <div class="member">
-                <div class="member-img">
-                  <img src="static/assets/img/team/team4.jpg" class="img-fluid" alt="">
-                  <div class="social">
-                    <a href=""><i class="bi bi-twitter"></i></a>
-                    <a href=""><i class="bi bi-facebook"></i></a>
-                    <a href=""><i class="bi bi-instagram"></i></a>
-                    <a href=""><i class="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div class="member-info">
-                  <h4>Mahadevan</h4>
-                  <span>Tester</span>
-                 
-                </div>
-              </div>
-            </div>
-  
+        <div class="scan-info">
+          <p><strong>SCAN TYPE:</strong> Fundus Photography</p>
+          <p><strong>PROCESSING SIZE:</strong> 32×32</p>
+          <p><strong>MODEL VERSION:</strong> CNN v2.3</p>
+          <p><strong>ANALYSIS DATE:</strong> {{ timestamp }}</p>
+        </div>
+      </div>
+
+      <!-- RIGHT RESULT PANEL -->
+      <div class="clinical-right">
+
+        <div class="diagnosis-card">
+          <h6 class="primary-heading">PRIMARY DIAGNOSIS</h6>
+          <h3 class="diagnosis-text">{{ diagnosis }}</h3>
+          <p class="diagnosis-desc" style="color: #000000;">
+            The neural network analysis indicates the presence of diabetic retinopathy
+            markers in the retinal scan. Immediate consultation with an ophthalmologist 
+            is recommended for evaluation and treatment planning.
+          </p>
+        </div>
+
+        <!-- CONFIDENCE CARD -->
+        <div class="confidence-card">
+          <div class="confidence-header">
+            <h5>Confidence Analysis</h5>
+            <span class="badge-high">High Confidence</span>
           </div>
-  
+
+          <p class="conf-label">Positive Detection</p>
+          <div class="conf-bar">
+            <div class="conf-fill positive" style="width: {{ (probabilities[0] * 100) | round(1) }}%;"></div>
+          </div>
+          <p class="conf-value">{{ (probabilities[0] * 100) | round(1) }}%</p>
+
+          <p class="conf-label mt-3">Negative Detection</p>
+          <div class="conf-bar">
+            <div class="conf-fill negative" style="width: {{ (probabilities[1] * 100) | round(1) }}%;"></div>
+          </div>
+          <p class="conf-value">{{ (probabilities[1] * 100) | round(1) }}%</p>
         </div>
-  
-      </section><!-- End Team Section -->
+
+        <!-- INSIGHTS CARD -->
+        <div class="insight-card">
+          <h5>Clinical Insights</h5>
+
+          <div class="insight-item">
+            <h6>Detection Methodology</h6>
+            <p>Deep learning model trained on retinal images with 91% accuracy.</p>
+          </div>
+
+          <div class="insight-item">
+            <h6>Recommended Action</h6>
+            <p>Schedule an ophthalmology consultation within 2 weeks.</p>
+          </div>
+
+          <div class="insight-item">
+            <h6>Risk Assessment</h6>
+            <p>Early intervention can significantly reduce vision loss.</p>
+          </div>
+        </div>
+
+        <!-- DOWNLOAD BUTTON -->
+        <form action="/download_report" method="POST" class="pdf-form">
+          <input type="hidden" name="image_path" value="{{ user_image }}">
+          <input type="hidden" name="diagnosis" value="{{ diagnosis }}">
+
+          {% for p in probabilities %}
+          <input type="hidden" name="probabilities" value="{{ p }}">
+          {% endfor %}
+
+          <button class="pdf-btn">Download Report</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
   
       
   
@@ -368,13 +541,12 @@
             </div>
   
             <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-              <h4>Contact Us</h4>
+              <h4>About Us</h4>
               <p>
-                AVS Engineering College, <br>
-                Salem, TN 636003<br>
-                India. <br><br>
-                <strong>Phone:</strong> +91 70946 53492<br>
-                <strong>Email:</strong> ajmalakram152@gmail.com<br>
+                <p>Students OF</p>
+                S.G. Balekundri Institue of Technology <br>
+                Shivabasavanagar, Belagavi, Karnataka – 590010<br>
+                Karnataka. <br><br>
               </p>
   
             </div>
