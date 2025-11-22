@@ -82,19 +82,9 @@ To use this project:
 4. Access the web interface at `http://localhost:5000`.
 5. Upload a retinal image and receive an instant diagnosis.
 
-## Live Demo
-
-Check out the live demo [here](https://diabetic-retinopathy-a5k8.onrender.com/).
 
 ## Contributing
 
 We welcome contributions! If you have suggestions or improvements, please feel free to submit a pull request or raise an issue.
 
-## Contact
-
-For any queries, please reach out via email: [ajmalakram152@gmail.com](mailto:ajmalakram152@gmail.com) or phone: +91-70946 53492.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
