@@ -33,7 +33,7 @@
   --primary-dark: #16A085;
   --primary-light: #48D1B5;
   --primary-pale: #E8F8F5;
-  --secondary: #F39C12;
+  --secondary: #e6e6e6;
   --secondary-light: #F5B041;
   --accent-orange: #E67E22;
   --dark: #1A1A2E;
@@ -1217,7 +1217,7 @@ section {
 # Footer
 --------------------------------------------------------------*/
 .footer {
-  background: var(--cream);
+  background: #ffffff ;
   padding: 0 0 24px 0;
   font-size: 0.9375rem;
 }

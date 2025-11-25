@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MediCare</title>
+
+    <!-- CSS INSIDE SAME FILE -->
+    <style>
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            background: #F3F4F6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* CONTAINER */
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        /* LOGIN CARD */
+        .auth-card {
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HEADER */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 10px;
+            color: #111827;
+        }
+
+        .auth-header p {
+            color: #6B7280;
+            margin-top: 6px;
+        }
+
+        /* FORM GROUP */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.6px solid #D1D5DB;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: 0.25s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #4F46E5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+        }
+
+        /* REMEMBER + FORGOT */
+        .form-extra {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .form-extra a {
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-extra a:hover {
+            text-decoration: underline;
+        }
+
+        /* BUTTON */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+        }
+
+        /* FOOTER */
+        .auth-footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .auth-footer a {
+            color: #4F46E5;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ERROR / SUCCESS */
+        .error-message, .success-message {
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            color: #B91C1C;
+        }
+
+        .success-message {
+            background: #DCFCE7;
+            color: #15803D;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="auth-card">
+
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+                        <circle cx="25" cy="25" r="23" fill="#4F46E5" opacity="0.1"/>
+                        <path d="M25 15v20M15 25h20" stroke="#4F46E5" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1>Welcome Back</h1>
+                <p>Login to continue</p>
+            </div>
+
+            <form id="loginForm">
+                
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label for="email">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        Email Address
+                    </label>
+                    <input type="email" id="email" placeholder="john@example.com" required>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label for="password">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Password
+                    </label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <!-- REMEMBER + FORGOT -->
+                <div class="form-extra">
+                    <label><input type="checkbox"> Remember me</label>
+                    <a href="#">Forgot Password?</a>
+                </div>
+
+                <!-- ERROR / SUCCESS -->
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <!-- BUTTON -->
+                <button type="submit" class="btn-primary">
+                    <span >Login</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+
+            </form>
+
+            <!-- FOOTER -->
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Placeholder login handling
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            document.getElementById("successMessage").style.display = "block";
+            document.getElementById("successMessage").innerText = "Login successful!";
+        });
+
+
+        async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const errorBox = document.getElementById("errorMessage");
+
+    errorBox.style.display = "none";
+
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.href = "index.html";   // your page after login
+    } catch (error) {
+        errorBox.innerText = error.message;
+        errorBox.style.display = "block";
+    }
+}
+
+    </script>
+
+</body>
+</html>

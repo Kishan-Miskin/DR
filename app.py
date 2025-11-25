@@ -1,5 +1,6 @@
 import tensorflow as tf
 from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import cv2
 import numpy as np
@@ -27,6 +28,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+
 
 
 def predict_class(path):
@@ -105,10 +110,10 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
         alignment=TA_CENTER,
         spaceAfter=30,
         fontName='Helvetica-Bold',
+        backColor=colors.HexColor('#f0f8f5'),
         borderWidth=2,
         borderColor=colors.HexColor('#0b5e3a'),
-        borderPadding=10,
-        backColor=colors.HexColor('#f0f8f5')
+        borderPadding=10
     )
 
     section_heading_style = ParagraphStyle(
@@ -119,9 +124,6 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
         fontName='Helvetica-Bold',
         spaceAfter=12,
         spaceBefore=16,
-        borderWidth=0,
-   
-        leftIndent=0,
         backColor=colors.HexColor('#e8f5e9'),
         borderPadding=6
     )
@@ -157,29 +159,21 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
         alignment=TA_CENTER
     )
 
-    # ==================== PAGE 1: HEADER & INFORMATION ====================
-    
-    # Hospital Header
+    # ==================== PAGE 1 ====================
+
     story.append(Paragraph("<b>Retinex Retinopathy Detection</b>", title_style))
-    story.append(Paragraph(
-        "Ai Based Retinopathy Detection<br/>",
-        hospital_style
-    ))
-    
-    # Horizontal line
+    story.append(Paragraph("Ai Based Retinopathy Detection<br/>", hospital_style))
+
     story.append(Spacer(1, 10))
-    line_data = [['', '']]
-    line_table = Table(line_data, colWidths=[500])
+    line_table = Table([['']], colWidths=[500])
     line_table.setStyle(TableStyle([
-        ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor('#0b5e3a')),
+        ('LINEABOVE', (0, 0), (0, 0), 2, colors.HexColor('#0b5e3a')),
     ]))
     story.append(line_table)
     story.append(Spacer(1, 20))
 
-    # Report Title
     story.append(Paragraph("DIABETIC RETINOPATHY SCREENING REPORT", report_title_style))
 
-    # Patient & Scan Information
     analysis_date = datetime.now().strftime("%B %d, %Y at %H:%M")
     report_id = f"DR-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
@@ -195,272 +189,180 @@ def generate_pdf_report(image_path, diagnosis, probabilities):
     info_table = Table(info_data, colWidths=[150, 340])
     info_table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#0b5e3a')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc')),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5'))
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc'))
     ]))
 
     story.append(info_table)
     story.append(Spacer(1, 25))
 
-    # Assessment Section
     story.append(Paragraph("CLINICAL ASSESSMENT", section_heading_style))
     story.append(Paragraph(
         "This automated screening analysis evaluates digital fundus photography for clinical "
-        "indicators of diabetic retinopathy (DR). The artificial intelligence model examines "
-        "retinal patterns including microaneurysms, hemorrhages, hard exudates, cotton wool spots, "
-        "and neovascularization. This technology assists healthcare providers in early detection "
-        "and timely referral for comprehensive ophthalmologic evaluation.",
+        "indicators of diabetic retinopathy...",
         body_style
     ))
     story.append(Spacer(1, 20))
 
-    # Diagnosis Result
+    # Diagnosis
     story.append(Paragraph("SCREENING RESULT", section_heading_style))
     story.append(Paragraph(diagnosis, diagnosis_style))
     story.append(Spacer(1, 20))
 
-    # Probability Table
+    # Probabilities
     story.append(Paragraph("PREDICTION CONFIDENCE LEVELS", section_heading_style))
-    
-    p_positive = round(probabilities[0] * 100, 2)
-    p_negative = round(probabilities[1] * 100, 2)
 
-    prob_data = [
+    p_pos = round(probabilities[0] * 100, 2)
+    p_neg = round(probabilities[1] * 100, 2)
+
+    prob_table = Table([
         ['Classification', 'Confidence (%)', 'Interpretation'],
-        ['Diabetic Retinopathy Detected', f'{p_positive}%', 
-         'Positive finding' if p_positive > 50 else 'Low probability'],
-        ['No Diabetic Retinopathy', f'{p_negative}%', 
-         'Negative finding' if p_negative > 50 else 'Low probability']
-    ]
+        ['Diabetic Retinopathy Detected', f'{p_pos}%', 'Positive finding' if p_pos > 50 else 'Low probability'],
+        ['No Diabetic Retinopathy', f'{p_neg}%', 'Negative finding' if p_neg > 50 else 'Low probability']
+    ], colWidths=[200, 140, 150])
 
-    prob_table = Table(prob_data, colWidths=[200, 140, 150])
     prob_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0b5e3a')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#ffebee') if p_positive > 50 else colors.HexColor('#e8f5e9')),
-        ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#e8f5e9') if p_negative > 50 else colors.HexColor('#ffebee')),
-        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#0b5e3a')),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8)
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#0b5e3a'))
     ]))
 
     story.append(prob_table)
     story.append(Spacer(1, 25))
 
-    # ==================== PAGE 2: RECOMMENDATIONS ====================
+    # ==================== PAGE 2 ====================
     story.append(PageBreak())
 
-    # Lifestyle Recommendations
-    story.append(Paragraph("LIFESTYLE RECOMMENDATIONS", section_heading_style))
-    
-    lifestyle_recommendations = [
-        ['<b>Blood Glucose Control</b>', 
-         'Maintain HbA1c levels below 7% (or as recommended by your physician). '
-         'Regular monitoring and medication adherence significantly reduce retinopathy progression.'],
-        
-        ['<b>Blood Pressure Management</b>', 
-         'Target BP < 130/80 mmHg. Hypertension accelerates microvascular damage in the retina.'],
-        
-        ['<b>Regular Exercise</b>', 
-         'Aim for at least 150 minutes of moderate aerobic activity per week (walking, cycling, swimming). '
-         'Consult your physician before starting new exercise routines.'],
-        
-        ['<b>Smoking Cessation</b>', 
-         'Tobacco use significantly increases risk of diabetic complications including retinopathy. '
-         'Seek support programs if needed.'],
-        
-        ['<b>Weight Management</b>', 
-         'Maintain healthy BMI (18.5-24.9). Even modest weight loss improves glycemic control.'],
-        
-        ['<b>Stress Management</b>', 
-         'Chronic stress affects blood sugar levels. Practice relaxation techniques, adequate sleep (7-8 hours), '
-         'and mindfulness exercises.']
-    ]
+    # -----------------------------------------
+    # IMPROVED CONDITION FOR SHOWING LIFESTYLE + DIET
+    # Check if diabetic retinopathy is detected (positive case)
+    # -----------------------------------------
+    diagnosis_lower = diagnosis.lower().strip()
+    # Show recommendations only if DR is detected (when it's NOT "no diabetic retinopathy")
+    show_recommendations = "no diabetic retinopathy" not in diagnosis_lower
 
-    for item in lifestyle_recommendations:
-        lifestyle_data = [[Paragraph(item[0], body_style), Paragraph(item[1], body_style)]]
-        lifestyle_table = Table(lifestyle_data, colWidths=[140, 350])
-        lifestyle_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('BACKGROUND', (0, 0), (0, 0), colors.HexColor('#e8f5e9')),
-            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc'))
+    # ==================== LIFESTYLE (ONLY IF POSITIVE) ====================
+    if show_recommendations:
+        story.append(Paragraph("LIFESTYLE RECOMMENDATIONS", section_heading_style))
+
+        lifestyle_recommendations = [
+            ['<b>Blood Glucose Control</b>', 'Maintain HbA1c below 7%.'],
+            ['<b>Blood Pressure</b>', 'Target < 130/80 mmHg.'],
+            ['<b>Exercise</b>', '150 minutes of activity weekly.'],
+            ['<b>Smoking</b>', 'Quit immediately.'],
+            ['<b>Weight</b>', 'Maintain healthy BMI.'],
+            ['<b>Stress</b>', 'Practice relaxation and sleep well.']
+        ]
+
+        for item in lifestyle_recommendations:
+            lifestyle_table = Table([[Paragraph(item[0], body_style), Paragraph(item[1], body_style)]],
+                                    colWidths=[140, 350])
+            lifestyle_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, 0), colors.HexColor('#e8f5e9')),
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#cccccc'))
+            ]))
+            story.append(lifestyle_table)
+            story.append(Spacer(1, 8))
+
+        story.append(Spacer(1, 15))
+
+    # ==================== DIET (ONLY IF POSITIVE) ====================
+    if show_recommendations:
+        story.append(Paragraph("DIETARY RECOMMENDATIONS", section_heading_style))
+
+        diet_intro = Paragraph(
+            "A retinal-protective diet rich in antioxidants and omega-3 helps prevent progression:",
+            body_style
+        )
+        story.append(diet_intro)
+        story.append(Spacer(1, 12))
+
+        diet_table = Table([
+            ['Food Category', 'Recommended Foods', 'Foods to Limit'],
+            ['Vegetables', 'Spinach, broccoli', 'Fried vegetables'],
+            ['Fruits', 'Berries, apples', 'Fruit juices'],
+            ['Proteins', 'Fish, legumes', 'Processed meats'],
+            ['Grains', 'Whole grains', 'White bread'],
+            ['Fats', 'Olive oil, nuts', 'Trans fats'],
+            ['Beverages', 'Water, green tea', 'Sugary drinks']
+        ], colWidths=[90, 200, 200])
+
+        diet_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0b5e3a')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#0b5e3a'))
         ]))
-        story.append(lifestyle_table)
-        story.append(Spacer(1, 8))
 
-    story.append(Spacer(1, 15))
+        story.append(diet_table)
+        story.append(Spacer(1, 20))
 
-    # Dietary Recommendations
-    story.append(Paragraph("DIETARY RECOMMENDATIONS", section_heading_style))
-
-    diet_intro = Paragraph(
-        "A retinal-protective diet rich in antioxidants, omega-3 fatty acids, and low glycemic "
-        "index foods can help manage diabetes and protect vision:",
-        body_style
-    )
-    story.append(diet_intro)
-    story.append(Spacer(1, 12))
-
-    diet_data = [
-        ['Food Category', 'Recommended Foods', 'Foods to Limit'],
-        
-        ['Vegetables', 
-         '• Leafy greens (spinach, kale)\n• Carrots, bell peppers\n• Broccoli, cauliflower',
-         '• Fried vegetables\n• High-sodium canned vegetables'],
-        
-        ['Fruits', 
-         '• Berries (blueberries, strawberries)\n• Citrus fruits\n• Apples, pears (with skin)',
-         '• Fruit juices\n• Dried fruits with added sugar\n• Canned fruits in syrup'],
-        
-        ['Proteins', 
-         '• Fatty fish (salmon, mackerel)\n• Skinless poultry\n• Legumes, beans\n• Nuts and seeds',
-         '• Processed meats\n• Fried proteins\n• High-fat red meats'],
-        
-        ['Grains', 
-         '• Whole grain bread\n• Brown rice, quinoa\n• Oats, barley',
-         '• White bread, pastries\n• Refined cereals\n• White rice'],
-        
-        ['Fats', 
-         '• Olive oil, avocado oil\n• Nuts (almonds, walnuts)\n• Avocados',
-         '• Trans fats\n• Deep-fried foods\n• Excessive butter/margarine'],
-        
-        ['Beverages', 
-         '• Water (8-10 glasses/day)\n• Green tea\n• Herbal teas',
-         '• Sugary sodas\n• Excessive caffeine\n• Alcoholic beverages']
-    ]
-
-    diet_table = Table(diet_data, colWidths=[90, 200, 200])
-    diet_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0b5e3a')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#f5f5f5')),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#0b5e3a')),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6)
-    ]))
-
-    story.append(diet_table)
-    story.append(Spacer(1, 20))
-
-    # Screening Recommendations
+    # ==================== SCREENING (ALWAYS SHOW) ====================
     story.append(Paragraph("FOLLOW-UP SCREENING SCHEDULE", section_heading_style))
-    
+
     screening_text = Paragraph(
-        "• <b>No DR detected:</b> Annual comprehensive eye examination<br/>"
-        "• <b>Mild DR:</b> Every 6-12 months or as advised by ophthalmologist<br/>"
-        "• <b>Moderate to Severe DR:</b> Every 3-6 months with specialist monitoring<br/>"
-        "• <b>Any visual changes:</b> Immediate ophthalmologic consultation",
+        "• <b>No DR detected:</b> Annual eye exam<br/>"
+        "• <b>Mild DR:</b> Every 6–12 months<br/>"
+        "• <b>Moderate–Severe:</b> Every 3–6 months<br/>"
+        "• <b>Any vision change:</b> Immediate consultation",
         body_style
     )
     story.append(screening_text)
     story.append(Spacer(1, 20))
 
-    # Uploaded Image (STILL ON PAGE 2)
+    # ==================== IMAGE ====================
     story.append(Paragraph("ANALYZED FUNDUS IMAGE", section_heading_style))
     story.append(Spacer(1, 15))
 
     try:
         img = Image(image_path)
-        # Smaller image to fit on page 2
         img.drawWidth = 3.5 * inch
         img.drawHeight = 3.5 * inch
-        
-        # Create centered table for image
         img_table = Table([[img]], colWidths=[5 * inch])
         img_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0b5e3a'))
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('BOX', (0, 0), (0, 0), 2, colors.HexColor('#0b5e3a'))
         ]))
         story.append(img_table)
-    except Exception as e:
-        story.append(Paragraph(
-            f"<i>Unable to load the uploaded image. Error: {str(e)}</i>", 
-            body_style
-        ))
+    except:
+        story.append(Paragraph("<i>Image load failed.</i>", body_style))
 
     story.append(Spacer(1, 15))
 
-    # Footer (AFTER IMAGE ON PAGE 2)
-    footer_line = Table([['', '']], colWidths=[490])
+    # ==================== FOOTER ====================
+    footer_line = Table([['']], colWidths=[490])
     footer_line.setStyle(TableStyle([
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.HexColor('#cccccc'))
+        ('LINEABOVE', (0, 0), (0, 0), 1, colors.HexColor('#cccccc'))
     ]))
     story.append(footer_line)
-    story.append(Spacer(10, 5))
-    
     story.append(Paragraph(
-        "<b>Retinex Retinopathy Detection</b> | AI Based Retinopathy Detection<br/>"
-        f"Report generated on {analysis_date} | Report ID: {report_id}",
+        f"<b>Retinex Retinopathy Detection</b> | Report generated on {analysis_date}",
         footer_style
     ))
 
-    # ==================== PAGE 3: DISCLAIMER ONLY ====================
+    # ==================== PAGE 3 DISCLAIMER ====================
     story.append(PageBreak())
-
-    # Medical Disclaimer
     story.append(Paragraph("IMPORTANT MEDICAL DISCLAIMER", section_heading_style))
-    
-    disclaimer_box_data = [[Paragraph(
+
+    disclaimer_table = Table([[Paragraph(
         "<b>THIS IS AN AI-ASSISTED SCREENING TOOL ONLY</b><br/><br/>"
-        "This report is generated by an artificial intelligence algorithm for preliminary screening purposes. "
-        "It is <b>NOT</b> a substitute for professional medical diagnosis or treatment. The AI model has "
-        "limitations and may produce false positives or false negatives.<br/><br/>"
-        "<b>REQUIRED ACTIONS:</b><br/>"
-        "• Schedule a comprehensive eye examination with a certified ophthalmologist<br/>"
-        "• Do not make treatment decisions based solely on this report<br/>"
-        "• Seek immediate medical attention if experiencing vision changes<br/><br/>"
-        "This screening does not replace dilated eye examinations, optical coherence tomography (OCT), "
-        "or fluorescein angiography when clinically indicated.",
+        "Not a substitute for medical diagnosis. Seek professional evaluation.",
         body_style
-    )]]
-    
-    disclaimer_table = Table(disclaimer_box_data, colWidths=[490])
+    )]], colWidths=[490])
+
     disclaimer_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#fff3cd')),
-        ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#d32f2f')),
-        ('LEFTPADDING', (0, 0), (-1, -1), 15),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-        ('TOPPADDING', (0, 0), (-1, -1), 15),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 15)
+        ('BACKGROUND', (0, 0), (0, 0), colors.HexColor('#fff3cd')),
+        ('BOX', (0, 0), (0, 0), 2, colors.HexColor('#d32f2f')),
+        ('TOPPADDING', (0, 0), (0, 0), 15),
+        ('BOTTOMPADDING', (0, 0), (0, 0), 15),
+        ('LEFTPADDING', (0, 0), (0, 0), 15)
     ]))
-    
+
     story.append(disclaimer_table)
-    story.append(Spacer(1, 30))
-
-    # Footer
     story.append(Spacer(1, 20))
-    footer_line = Table([['', '']], colWidths=[490])
-    footer_line.setStyle(TableStyle([
-        ('LINEABOVE', (0, 0), (-1, 0), 1, colors.HexColor('#cccccc'))
-    ]))
-   
 
-    # Build PDF
     doc.build(story)
     return file_name
+
 
 
 
@@ -514,6 +416,7 @@ def download_report():
 
     pdf_file = generate_pdf_report(image_path, diagnosis, probabilities)
     return send_file(pdf_file, as_attachment=True)
+
 
 
 if __name__ == '__main__':
